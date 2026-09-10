@@ -1,0 +1,6 @@
+{
+  "name": "TC Consultancy — Engineering & Project Management",
+  "description": "Comprehensive engineering consultancy website with modern public storefront, interactive GCC project map, RFQ pipeline, and live chat admin command center.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
