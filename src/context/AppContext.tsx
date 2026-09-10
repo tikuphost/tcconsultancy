@@ -58,6 +58,7 @@ interface AppContextType {
   sendCustomerMessage: (text: string, userMeta?: { name: string; email: string; company: string; country?: string }) => void;
   // Admin Chat actions
   sendAgentMessage: (sessionId: string, text: string) => void;
+  sendStaffMessage: (sessionId: string, text: string) => void;
   updateSessionTags: (sessionId: string, tags: string[]) => void;
   updateSessionStatus: (sessionId: string, status: ChatSession['status']) => void;
   updateSessionPriority: (sessionId: string, priority: ChatSession['priority']) => void;
@@ -93,6 +94,31 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
+const safeParseLocalStorage = <T,>(key: string, fallback: T): T => {
+  try {
+    if (typeof window === 'undefined' || !window.localStorage) return fallback;
+    const saved = localStorage.getItem(key);
+    if (!saved) return fallback;
+    const parsed = JSON.parse(saved);
+    if (Array.isArray(fallback)) {
+      return Array.isArray(parsed) && parsed.length > 0 ? (parsed as T) : fallback;
+    }
+    return parsed && typeof parsed === 'object' ? (parsed as T) : fallback;
+  } catch {
+    return fallback;
+  }
+};
+
+const safeSetLocalStorage = (key: string, value: any) => {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+  } catch {
+    // Gracefully handle storage quota or private mode restrictions
+  }
+};
+
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [page, setPage] = useState<PageView>('home');
   const [selectedServiceSlug, setSelectedServiceSlug] = useState<string | null>(null);
@@ -105,30 +131,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
 
-  const [projects, setProjects] = useState<ProjectItem[]>(() => {
-    const saved = localStorage.getItem('tc_projects');
-    return saved ? JSON.parse(saved) : INITIAL_PROJECTS;
-  });
+  const [projects, setProjects] = useState<ProjectItem[]>(() =>
+    safeParseLocalStorage('tc_projects', INITIAL_PROJECTS)
+  );
 
-  const [blogPosts, setBlogPosts] = useState<BlogPost[]>(() => {
-    const saved = localStorage.getItem('tc_blogs');
-    return saved ? JSON.parse(saved) : INITIAL_BLOG_POSTS;
-  });
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>(() =>
+    safeParseLocalStorage('tc_blogs', INITIAL_BLOG_POSTS)
+  );
 
-  const [chatTags, setChatTags] = useState<ChatTag[]>(() => {
-    const saved = localStorage.getItem('tc_chat_tags');
-    return saved ? JSON.parse(saved) : INITIAL_CHAT_TAGS;
-  });
+  const [chatTags, setChatTags] = useState<ChatTag[]>(() =>
+    safeParseLocalStorage('tc_chat_tags', INITIAL_CHAT_TAGS)
+  );
 
-  const [chatSessions, setChatSessions] = useState<ChatSession[]>(() => {
-    const saved = localStorage.getItem('tc_chat_sessions');
-    return saved ? JSON.parse(saved) : INITIAL_CHAT_SESSIONS;
-  });
+  const [chatSessions, setChatSessions] = useState<ChatSession[]>(() =>
+    safeParseLocalStorage('tc_chat_sessions', INITIAL_CHAT_SESSIONS)
+  );
 
-  const [quotations, setQuotations] = useState<Quotation[]>(() => {
-    const saved = localStorage.getItem('tc_quotations');
-    return saved ? JSON.parse(saved) : INITIAL_QUOTATIONS;
-  });
+  const [quotations, setQuotations] = useState<Quotation[]>(() =>
+    safeParseLocalStorage('tc_quotations', INITIAL_QUOTATIONS)
+  );
 
   const [activeSessionId, setActiveSessionId] = useState<string>('session-101');
   const [toasts, setToasts] = useState<ToastNotice[]>([]);
@@ -158,23 +179,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Persist state updates to localStorage
   useEffect(() => {
-    localStorage.setItem('tc_projects', JSON.stringify(projects));
+    safeSetLocalStorage('tc_projects', projects);
   }, [projects]);
 
   useEffect(() => {
-    localStorage.setItem('tc_blogs', JSON.stringify(blogPosts));
+    safeSetLocalStorage('tc_blogs', blogPosts);
   }, [blogPosts]);
 
   useEffect(() => {
-    localStorage.setItem('tc_chat_tags', JSON.stringify(chatTags));
+    safeSetLocalStorage('tc_chat_tags', chatTags);
   }, [chatTags]);
 
   useEffect(() => {
-    localStorage.setItem('tc_chat_sessions', JSON.stringify(chatSessions));
+    safeSetLocalStorage('tc_chat_sessions', chatSessions);
   }, [chatSessions]);
 
   useEffect(() => {
-    localStorage.setItem('tc_quotations', JSON.stringify(quotations));
+    safeSetLocalStorage('tc_quotations', quotations);
   }, [quotations]);
 
   const showToast = (message: string, type: 'success' | 'info' | 'warning' | 'error' = 'info') => {
@@ -585,6 +606,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setActiveSessionId,
         sendCustomerMessage,
         sendAgentMessage,
+        sendStaffMessage: sendAgentMessage,
         updateSessionTags,
         updateSessionStatus,
         updateSessionPriority,

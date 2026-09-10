@@ -12,10 +12,26 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+      // Ensure GitHub Pages project URLs have a trailing slash for relative asset resolution
+      (function() {
+        var path = window.location.pathname;
+        if (window.location.hostname.indexOf('github.io') !== -1 && path.split('/').filter(Boolean).length === 1 && !path.endsWith('/')) {
+          window.location.replace(path + '/' + window.location.search + window.location.hash);
+        }
+      })();
+    </script>
   </head>
   <body class="bg-[#F8FAFC] text-[#0B1F3A] font-sans antialiased selection:bg-[#F5A623] selection:text-white">
-    <div id="root"></div>
+    <div id="root">
+      <div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #0B1F3A; color: #ffffff; font-family: system-ui, -apple-system, sans-serif;">
+        <div style="width: 52px; height: 52px; border-radius: 12px; background-color: #F5A623; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #0B1F3A; font-size: 22px; margin-bottom: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.35);">
+          TC
+        </div>
+        <div style="font-size: 16px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;">TC CONSULTANCY FZC</div>
+        <div style="font-size: 12px; color: #94A3B8; margin-top: 6px;">Loading Engineering & Commercial Operations Platform...</div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-
